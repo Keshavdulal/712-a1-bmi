@@ -1,111 +1,94 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
+ * BMI App
+ * Assignment 1 - Enteprise Tech - Przemyslaw Pawluk
+ * Author - Keshav Dulal
  */
 
-import React from 'react';
-import type {Node} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
   Text,
-  useColorScheme,
   View,
+  Button,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+  useColorScheme,
 } from 'react-native';
+import React, {useState, useEffect} from 'react';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-const Section = ({children, title}): Node => {
+const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [userBmi, setUserBmi] = useState(0);
+  const [userHeight, setUserHeight] = useState(0);
+  const [userWeight, setUserWeight] = useState(0);
+  const [isMetric, setMetric] = useState(false);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  useEffect(() => {
+    if (userHeight && userWeight) {
+      // bmi formulla = weight (kg) / height (m)^2
+      const heightInMeter = userHeight / 100;
+      const userBMI = userWeight / (heightInMeter * heightInMeter);
+
+      setUserBmi(userBMI.toFixed(2));
+    }
+  }, [userHeight, userWeight]);
+
+  const handleWeightInput = newWeight => setUserWeight(newWeight);
+  const handleHeightInput = newHeight => setUserHeight(newHeight);
+
   return (
     <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      <View style={styles.appWrapper}>
+        {/* INPUTS */}
+        <Text>Height ({isMetric ? 'in' : 'cm'})</Text>
+        <TextInput
+          keyboardType="numeric"
+          styles={styles.textInput}
+          value={userHeight}
+          onChangeText={handleHeightInput}
+          placeholde="Your Height"
+        />
+        <Text>Weight ({isMetric ? 'lb' : 'kg'})</Text>
+        <TextInput
+          keyboardType="numeric"
+          styles={styles.textInput}
+          value={userWeight}
+          onChangeText={handleWeightInput}
+          placeholde="Your Weight"
+        />
+
+        {/* OUTPUT */}
+        <Text>BMI:{userBmi}</Text>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  backgroundStyle: {},
+  appWrapper: {
+    padding: 20,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  unitButtonsWrapper: {
+    flexDirection: 'row',
+    flexGrow: 1,
+    justifyContent: 'space-evenly',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  // button: {},
+  // buttonActive: {},
+  textInput: {
+    height: 40,
+    margin: 12,
+    borderWidth: 10,
+    borderColor: '#000',
+    borderBottomColor: '#000',
+    backgroundColor: '#000',
   },
 });
 
