@@ -32,19 +32,43 @@ const App = () => {
   useEffect(() => {
     if (userHeight && userWeight) {
       // bmi formulla = weight (kg) / height (m)^2
-      const heightInMeter = userHeight / 100;
-      const userBMI = userWeight / (heightInMeter * heightInMeter);
+      const userBMI = isMetric
+        ? (userWeight / userHeight / userHeight) * 703
+        : (userWeight / userHeight / userHeight) * 100 * 100;
 
       setUserBmi(userBMI.toFixed(2));
     }
-  }, [userHeight, userWeight]);
+  }, [userHeight, userWeight, isMetric]);
 
   const handleWeightInput = newWeight => setUserWeight(newWeight);
   const handleHeightInput = newHeight => setUserHeight(newHeight);
 
+  const clearInputs = () => {
+    setUserHeight(0);
+    setUserWeight(0);
+    setUserBmi(0);
+  };
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <View style={styles.appWrapper}>
+        {/* Unit System - Switch */}
+        <Text>Unit System</Text>
+        <View style={styles.unitButtonsWrapper}>
+          <Button
+            style={styles.button}
+            title="SI"
+            onPress={() => setMetric(false)}
+            color={!isMetric ? '#2196F3' : '#ddd'}
+          />
+          <Button
+            onPress={() => setMetric(true)}
+            style={styles.button}
+            title="Metric"
+            color={isMetric ? '#2196F3' : '#ddd'}
+          />
+        </View>
+
         {/* INPUTS */}
         <Text>Height ({isMetric ? 'in' : 'cm'})</Text>
         <TextInput
@@ -52,7 +76,7 @@ const App = () => {
           styles={styles.textInput}
           value={userHeight}
           onChangeText={handleHeightInput}
-          placeholde="Your Height"
+          underlineColorAndroid="#222"
         />
         <Text>Weight ({isMetric ? 'lb' : 'kg'})</Text>
         <TextInput
@@ -60,18 +84,23 @@ const App = () => {
           styles={styles.textInput}
           value={userWeight}
           onChangeText={handleWeightInput}
-          placeholde="Your Weight"
+          underlineColorAndroid="#222"
         />
 
         {/* OUTPUT */}
         <Text>BMI:{userBmi}</Text>
+
+        <Button onPress={clearInputs} title="Clear Inputs" />
       </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundStyle: {},
+  backgroundStyle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   appWrapper: {
     padding: 20,
   },
@@ -83,8 +112,8 @@ const styles = StyleSheet.create({
   // button: {},
   // buttonActive: {},
   textInput: {
-    height: 40,
-    margin: 12,
+    // height: 40,
+    // margin: 12,
     borderWidth: 10,
     borderColor: '#000',
     borderBottomColor: '#000',
