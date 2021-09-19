@@ -21,6 +21,7 @@ const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
   const [userBmi, setUserBmi] = useState(0);
+  const [userBmiCategory, setUserBmiCategory] = useState('');
   const [userHeight, setUserHeight] = useState(0);
   const [userWeight, setUserWeight] = useState(0);
   const [isMetric, setMetric] = useState(false);
@@ -37,6 +38,40 @@ const App = () => {
         : (userWeight / userHeight / userHeight) * 100 * 100;
 
       setUserBmi(userBMI.toFixed(2));
+
+      switch (true) {
+        case userBMI < 16:
+          setUserBmiCategory('Underweight (Severe thinness)');
+          break;
+
+        case userBMI >= 16 && userBMI <= 16.9:
+          setUserBmiCategory('Underweight (Moderate thinness)');
+          break;
+
+        case userBMI >= 17 && userBMI <= 18.4:
+          setUserBmiCategory('Underweight (Mild thinness)');
+          break;
+
+        case userBMI >= 18.5 && userBMI <= 24.9:
+          setUserBmiCategory('Normal range');
+          break;
+
+        case userBMI >= 25 && userBMI <= 29.9:
+          setUserBmiCategory('Overweight (Pre-Obese)');
+          break;
+
+        case userBMI >= 30 && userBMI <= 34.9:
+          setUserBmiCategory('Obese (Class I)');
+          break;
+
+        case userBMI >= 35 && userBMI <= 39.9:
+          setUserBmiCategory('Obese (Class II)');
+          break;
+
+        case userBMI >= 40:
+          setUserBmiCategory('Obese (Class III)');
+          break;
+      }
     }
   }, [userHeight, userWeight, isMetric]);
 
@@ -89,8 +124,21 @@ const App = () => {
 
         {/* OUTPUT */}
         <Text>BMI:{userBmi}</Text>
+        <Text>Your BMI Category:{userBmiCategory}</Text>
 
         <Button onPress={clearInputs} title="Clear Inputs" />
+
+        {/* BMI Classes */}
+
+        <Text>BMI Categories</Text>
+        <Text>⩽ 16.0 Underweight (Severe thinness)</Text>
+        <Text>16.0 – 16.9 Underweight (Moderate thinness)</Text>
+        <Text>17.0 – 18.4 Underweight (Mild thinness) </Text>
+        <Text>18.5 – 24.9 Normal range</Text>
+        <Text>25.0 – 29.9 Overweight (Pre-obese)</Text>
+        <Text>30.0 – 34.9 Obese (Class I)</Text>
+        <Text>35.0 – 39.9 Obese (Class II)</Text>
+        <Text>⩾ 40.0 Obese (Class III)</Text>
       </View>
     </SafeAreaView>
   );
