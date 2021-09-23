@@ -11,31 +11,38 @@ import {
   TextInput,
   StyleSheet,
   SafeAreaView,
-  useColorScheme,
+  FlatList,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
+import * as palette from './palette'; // color palette
+
+const categories = [
+  '⩽ 16.0 Underweight (Severe thinness)',
+  '16.0 – 16.9 Underweight (Moderate thinness)',
+  '17.0 – 18.4 Underweight (Mild thinness)',
+  '18.5 – 24.9 Normal range<',
+  '25.0 – 29.9 Overweight (Pre-obese)',
+  '30.0 – 34.9 Obese (Class I)',
+  '35.0 – 39.9 Obese (Class II)',
+  '⩾ 40.0 Obese (Class III)',
+];
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
+  // Application states
   const [userBmi, setUserBmi] = useState(0);
-  const [userBmiCategory, setUserBmiCategory] = useState('');
+  const [userBmiCategory, setUserBmiCategory] = useState('Category Unknown');
   const [userHeight, setUserHeight] = useState(0);
   const [userWeight, setUserWeight] = useState(0);
   const [isMetric, setMetric] = useState(false);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   useEffect(() => {
     if (userHeight && userWeight) {
-      // bmi formulla = weight (kg) / height (m)^2
+      // switch between systems using ternary operator
+      // bmi = weight (kg) / height (m)^2
       const userBMI = isMetric
-        ? (userWeight / userHeight / userHeight) * 703
-        : (userWeight / userHeight / userHeight) * 100 * 100;
+        ? (userWeight / userHeight / userHeight) * 703 // Imperial (lb, in)
+        : (userWeight / userHeight / userHeight) * 100 * 100; // SI (kg, cm)
 
       setUserBmi(userBMI.toFixed(2));
 
@@ -85,87 +92,171 @@ const App = () => {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={styles.root}>
       <View style={styles.appWrapper}>
-        {/* Unit System - Switch */}
-        <Text>Unit System</Text>
-        <View style={styles.unitButtonsWrapper}>
-          <Button
-            style={styles.button}
-            title="SI"
-            onPress={() => setMetric(false)}
-            color={!isMetric ? '#2196F3' : '#ddd'}
-          />
-          <Button
-            onPress={() => setMetric(true)}
-            style={styles.button}
-            title="Metric"
-            color={isMetric ? '#2196F3' : '#ddd'}
-          />
+        {/* Unit System - Switcher */}
+        <View style={styles.switchSection}>
+          <Text style={styles.title}>BMI Calculator</Text>
+          <View style={styles.buttonGroup}>
+            <View style={!isMetric ? styles.buttonActive : styles.button}>
+              <Button
+                title="SI"
+                onPress={() => setMetric(false)}
+                color={
+                  !isMetric
+                    ? palette.primaryColorText
+                    : palette.primaryColorDark
+                }
+              />
+            </View>
+
+            <View style={isMetric ? styles.buttonActive : styles.button}>
+              <Button
+                onPress={() => setMetric(true)}
+                title="Metric"
+                color={
+                  isMetric ? palette.primaryColorText : palette.primaryColorDark
+                }
+              />
+            </View>
+          </View>
         </View>
 
         {/* INPUTS */}
-        <Text>Height ({isMetric ? 'in' : 'cm'})</Text>
-        <TextInput
-          keyboardType="numeric"
-          styles={styles.textInput}
-          value={userHeight}
-          onChangeText={handleHeightInput}
-          underlineColorAndroid="#222"
-        />
-        <Text>Weight ({isMetric ? 'lb' : 'kg'})</Text>
-        <TextInput
-          keyboardType="numeric"
-          styles={styles.textInput}
-          value={userWeight}
-          onChangeText={handleWeightInput}
-          underlineColorAndroid="#222"
-        />
+        <View style={styles.inputWrapper}>
+          <Text style={styles.inputLabel}>
+            Height ({isMetric ? 'in' : 'cm'})
+          </Text>
+          <TextInput
+            keyboardType="numeric"
+            styles={styles.textInput}
+            value={userHeight}
+            onChangeText={handleHeightInput}
+            underlineColorAndroid="#222"
+          />
+        </View>
+
+        <View style={styles.inputWrapper}>
+          <Text style={styles.inputLabel}>
+            Weight ({isMetric ? 'lb' : 'kg'})
+          </Text>
+          <TextInput
+            keyboardType="numeric"
+            styles={styles.textInput}
+            value={userWeight}
+            onChangeText={handleWeightInput}
+            underlineColorAndroid="#222"
+          />
+        </View>
+
+        <View style={styles.clearButton}>
+          <Button
+            onPress={clearInputs}
+            title="Clear"
+            color={palette.primaryColorText}
+          />
+        </View>
 
         {/* OUTPUT */}
-        <Text>BMI:{userBmi}</Text>
-        <Text>Your BMI Category:{userBmiCategory}</Text>
-
-        <Button onPress={clearInputs} title="Clear Inputs" />
+        <View style={styles.outputSection}>
+          <Text style={styles.title}>{userBmi}</Text>
+          <Text style={styles.title}>{userBmiCategory}</Text>
+        </View>
 
         {/* BMI Classes */}
-
-        <Text>BMI Categories</Text>
-        <Text>⩽ 16.0 Underweight (Severe thinness)</Text>
-        <Text>16.0 – 16.9 Underweight (Moderate thinness)</Text>
-        <Text>17.0 – 18.4 Underweight (Mild thinness) </Text>
-        <Text>18.5 – 24.9 Normal range</Text>
-        <Text>25.0 – 29.9 Overweight (Pre-obese)</Text>
-        <Text>30.0 – 34.9 Obese (Class I)</Text>
-        <Text>35.0 – 39.9 Obese (Class II)</Text>
-        <Text>⩾ 40.0 Obese (Class III)</Text>
+        {/* <Text style={styles.subTitle}>BMI Categories</Text> */}
+        <View style={styles.divider} />
+        <FlatList
+          style={styles.indexList}
+          keyExtractor={i => i}
+          data={categories}
+          renderItem={i => <Text style={styles.indexItem}>{i?.item}</Text>}
+        />
       </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundStyle: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  root: {
+    flex: 1,
+    backgroundColor: palette.primaryColor,
   },
   appWrapper: {
     padding: 20,
   },
-  unitButtonsWrapper: {
+
+  switchSection: {
+    alignContent: 'center',
+  },
+  title: {
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    marginTop: 10,
+    fontSize: 20,
+    color: palette.primaryColorLight,
+  },
+  subTitle: {
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    marginVertical: 10,
+    fontSize: 16,
+  },
+  buttonGroup: {
+    marginTop: 10,
     flexDirection: 'row',
-    flexGrow: 1,
     justifyContent: 'space-evenly',
   },
-  // button: {},
-  // buttonActive: {},
-  textInput: {
-    // height: 40,
-    // margin: 12,
-    borderWidth: 10,
+  buttonWrapper: {
+    borderWidth: 1,
     borderColor: '#000',
-    borderBottomColor: '#000',
-    backgroundColor: '#000',
+  },
+  button: {
+    flex: 1,
+    borderWidth: 1,
+    backgroundColor: palette.dividerColor,
+    borderColor: palette.dividerColor,
+    // borderColor: palette.primaryColorDark,
+  },
+  buttonActive: {
+    flex: 1,
+    borderWidth: 1,
+    backgroundColor: palette.accentColor,
+    borderColor: palette.accentColor,
+    // borderColor: palette.primaryColorDark,
+  },
+  clearButton: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: palette.primaryColorLight,
+  },
+  inputWrapper: {
+    // flexDirection: 'row',
+    padding: 10,
+    marginTop: 10,
+    backgroundColor: palette.primaryColorLight,
+  },
+  inputLabel: {
+    color: palette.primaryColorDark,
+  },
+  textInput: {
+    backgroundColor: palette.accentColor,
+  },
+
+  outputSection: {
+    marginTop: 10,
+  },
+  divider: {
+    marginTop: 10,
+    borderWidth: 0.5,
+    borderColor: palette.dividerColor,
+  },
+
+  indexList: {
+    marginTop: 10,
+  },
+  indexItem: {
+    color: palette.primaryColorLight,
   },
 });
 
